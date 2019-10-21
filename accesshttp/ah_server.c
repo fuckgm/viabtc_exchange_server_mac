@@ -3,8 +3,8 @@
  *     History: yang@haipo.me, 2017/04/21, create
  */
 
-# include "ah_config.h"
-# include "ah_server.h"
+#include "ah_config.h"
+#include "ah_server.h"
 
 static http_svr *svr;
 static nw_state *state;
@@ -15,13 +15,15 @@ static rpc_clt *matchengine;
 static rpc_clt *marketprice;
 static rpc_clt *readhistory;
 
-struct state_info {
-    nw_ses  *ses;
+struct state_info
+{
+    nw_ses *ses;
     uint64_t ses_id;
-    int64_t  request_id;
+    int64_t request_id;
 };
 
-struct request_info {
+struct request_info
+{
     rpc_clt *clt;
     uint32_t cmd;
 };
@@ -62,61 +64,73 @@ static void reply_time_out(nw_ses *ses, int64_t id)
     reply_error(ses, id, 5, "service timeout", 504);
 }
 
+// rpc服务器响应
+// ses请求的操作
+
 static int on_http_request(nw_ses *ses, http_request_t *request)
 {
     log_trace("new http request, url: %s, method: %u", request->url, request->method);
-    if (request->method != HTTP_POST || !request->body) {
+    if (request->method != HTTP_POST || !request->body)
+    {
         reply_bad_request(ses);
         return -__LINE__;
     }
 
     json_t *body = json_loadb(request->body, sdslen(request->body), 0, NULL);
-    if (body == NULL) {
+    if (body == NULL)
+    {
         goto decode_error;
     }
-    json_t *id = json_object_get(body, "id");
-    if (!id || !json_is_integer(id)) {
+    json_t *id = json_object_get(body, "id"); //请求id
+    if (!id || !json_is_integer(id))
+    {
         goto decode_error;
     }
-    json_t *method = json_object_get(body, "method");
-    if (!method || !json_is_string(method)) {
+    json_t *method = json_object_get(body, "method"); //请求方法
+    if (!method || !json_is_string(method))
+    {
         goto decode_error;
     }
-    json_t *params = json_object_get(body, "params");
-    if (!params || !json_is_array(params)) {
+    json_t *params = json_object_get(body, "params"); //请求参数
+    if (!params || !json_is_array(params))
+    {
         goto decode_error;
     }
     log_trace("from: %s body: %s", nw_sock_human_addr(&ses->peer_addr), request->body);
 
-    dict_entry *entry = dict_find(methods, json_string_value(method));
-    if (entry == NULL) {
+    dict_entry *entry = dict_find(methods, json_string_value(method)); //根据请求方法查找对应的rpc接口
+    if (entry == NULL)
+    {
         reply_not_found(ses, json_integer_value(id));
-    } else {
-        struct request_info *req = entry->val;
-        if (!rpc_clt_connected(req->clt)) {
+    }
+    else
+    {
+        struct request_info *req = entry->val; //请求的信息
+        if (!rpc_clt_connected(req->clt))
+        {
             reply_internal_error(ses);
             json_decref(body);
             return 0;
         }
 
-        nw_state_entry *entry = nw_state_add(state, settings.timeout, 0);
+        nw_state_entry *entry = nw_state_add(state, settings.timeout, 0); //
         struct state_info *info = entry->data;
         info->ses = ses;
         info->ses_id = ses->id;
         info->request_id = json_integer_value(id);
 
-        rpc_pkg pkg;
+        rpc_pkg pkg; //请求的响应
         memset(&pkg, 0, sizeof(pkg));
-        pkg.pkg_type  = RPC_PKG_TYPE_REQUEST;
-        pkg.command   = req->cmd;
-        pkg.sequence  = entry->id;
-        pkg.req_id    = json_integer_value(id);
-        pkg.body      = json_dumps(params, 0);
+        pkg.pkg_type = RPC_PKG_TYPE_REQUEST;
+        pkg.command = req->cmd;
+        pkg.sequence = entry->id;
+        pkg.req_id = json_integer_value(id);
+        pkg.body = json_dumps(params, 0);
         pkg.body_size = strlen(pkg.body);
 
-        rpc_clt_send(req->clt, &pkg);
+        rpc_clt_send(req->clt, &pkg); //调用rpc接口
         log_debug("send request to %s, cmd: %u, sequence: %u",
-                nw_sock_human_addr(rpc_clt_peer_addr(req->clt)), pkg.command, pkg.sequence);
+                  nw_sock_human_addr(rpc_clt_peer_addr(req->clt)), pkg.command, pkg.sequence);
         free(pkg.body);
     }
 
@@ -169,7 +183,8 @@ static void on_state_timeout(nw_state_entry *entry)
 {
     log_error("state id: %u timeout", entry->id);
     struct state_info *info = entry->data;
-    if (info->ses->id == info->ses_id) {
+    if (info->ses->id == info->ses_id)
+    {
         reply_time_out(info->ses, info->request_id);
     }
 }
@@ -177,9 +192,12 @@ static void on_state_timeout(nw_state_entry *entry)
 static void on_backend_connect(nw_ses *ses, bool result)
 {
     rpc_clt *clt = ses->privdata;
-    if (result) {
+    if (result)
+    {
         log_info("connect %s:%s success", clt->name, nw_sock_human_addr(&ses->peer_addr));
-    } else {
+    }
+    else
+    {
         log_info("connect %s:%s fail", clt->name, nw_sock_human_addr(&ses->peer_addr));
     }
 }
@@ -187,11 +205,13 @@ static void on_backend_connect(nw_ses *ses, bool result)
 static void on_backend_recv_pkg(nw_ses *ses, rpc_pkg *pkg)
 {
     log_debug("recv pkg from: %s, cmd: %u, sequence: %u",
-            nw_sock_human_addr(&ses->peer_addr), pkg->command, pkg->sequence);
+              nw_sock_human_addr(&ses->peer_addr), pkg->command, pkg->sequence);
     nw_state_entry *entry = nw_state_get(state, pkg->sequence);
-    if (entry) {
+    if (entry)
+    {
         struct state_info *info = entry->data;
-        if (info->ses->id == info->ses_id) {
+        if (info->ses->id == info->ses_id)
+        {
             log_trace("send response to: %s", nw_sock_human_addr(&info->ses->peer_addr));
             send_http_response_simple(info->ses, 200, pkg->body, pkg->body_size);
         }
@@ -201,9 +221,12 @@ static void on_backend_recv_pkg(nw_ses *ses, rpc_pkg *pkg)
 
 static void on_listener_connect(nw_ses *ses, bool result)
 {
-    if (result) {
+    if (result)
+    {
         log_info("connect listener success");
-    } else {
+    }
+    else
+    {
         log_info("connect listener fail");
     }
 }
@@ -215,7 +238,8 @@ static void on_listener_recv_pkg(nw_ses *ses, rpc_pkg *pkg)
 
 static void on_listener_recv_fd(nw_ses *ses, int fd)
 {
-    if (nw_svr_add_clt_fd(svr->raw_svr, fd) < 0) {
+    if (nw_svr_add_clt_fd(svr->raw_svr, fd) < 0)
+    {
         log_error("nw_svr_add_clt_fd: %d fail: %s", fd, strerror(errno));
         close(fd);
     }
@@ -235,9 +259,9 @@ static int init_listener_clt(void)
 
     rpc_clt_type type;
     memset(&type, 0, sizeof(type));
-    type.on_connect  = on_listener_connect;
+    type.on_connect = on_listener_connect;
     type.on_recv_pkg = on_listener_recv_pkg;
-    type.on_recv_fd  = on_listener_recv_fd;
+    type.on_recv_fd = on_listener_recv_fd;
 
     listener = rpc_clt_create(&cfg, &type);
     if (listener == NULL)
@@ -250,7 +274,7 @@ static int init_listener_clt(void)
 
 static int add_handler(char *method, rpc_clt *clt, uint32_t cmd)
 {
-    struct request_info info = { .clt = clt, .cmd = cmd };
+    struct request_info info = {.clt = clt, .cmd = cmd};
     if (dict_add(methods, method, &info) == NULL)
         return __LINE__;
     return 0;
@@ -340,4 +364,3 @@ int init_server(void)
 
     return 0;
 }
-
