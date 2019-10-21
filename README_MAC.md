@@ -121,11 +121,13 @@
     将ut_misc.c里的program_invocation_short_name改成appname
 - fatal error: 'mysql/mysql.h' file not found  
     将根目录下的makefile.inc添加以下值
+    ```
     LDFLAGS= -L/usr/local/opt/mysql@5.7/lib
     CFLAGS= -I/usr/local/opt/mysql@5.7/include
+    ```
 
 - undefined reference to `rd_kafka_conf_set_log_cb'  
-makefile里面将LIBS的 -lrdkafka移到行尾
+    makefile里面将LIBS的 -lrdkafka移到行尾
 
 ### accesshttp/accessws
 - fatal error: 'error.h' file not found  
