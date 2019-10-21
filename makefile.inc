@@ -2,7 +2,7 @@ SOURCE  := $(wildcard *.c)
 OBJS    := $(patsubst %.c, %.o, $(SOURCE))
 CC      := gcc
 CFLAGS  := -Wall -Wno-strict-aliasing -Wno-uninitialized -g -rdynamic -std=gnu99 -I/usr/local/opt/mysql@5.7/include 
-LFLAGS  := -g -rdynamic -L/usr/local/opt/mysql@5.7/lib
+LFLAGS  := -g -rdynamic -L/usr/local/mysql/lib
 
 
 .PHONY : all clean install 
