@@ -5,7 +5,7 @@
         "core_limit": 1000000000
     },
     "log": {
-        "path": "/var/log/trade/matchengine",
+        "path": "./matchengine",
         "flag": "fatal,error,warn,info,debug,trace",
         "num": 10
     },
@@ -25,14 +25,14 @@
     "cli": "tcp@127.0.0.1:7317",
     "db_log": {
         "host": "localhost",
-        "user": "user",
-        "pass": "pass",
+        "user": "root",
+        "pass": "qq366370771",
         "name": "trade_log"
     },
     "db_history": {
         "host": "localhost",
-        "user": "user",
-        "pass": "pass",
+        "user": "root",
+        "pass": "qq366370771",
         "name": "trade_history"
     },
     "assets": [
@@ -73,6 +73,16 @@
         },
         {
             "name": "DSH",
+            "prec_save": 12,
+            "prec_show": 8
+        },
+        {
+            "name": "USDT",
+            "prec_save": 20,
+            "prec_show": 8
+        },
+        {
+            "name": "EOS",
             "prec_save": 12,
             "prec_show": 8
         }
@@ -161,6 +171,66 @@
                 "prec": 8
             },
             "min_amount": "0.001"
+        },
+        {
+            "name": "BTCUSDT",
+            "stock": {
+                "name": "BTC",
+                "prec": 8
+            },
+            "money": {
+                "name": "USDT",
+                "prec": 8
+            },
+            "min_amount": "0.0001"
+        },
+        {
+            "name": "ETHUSDT",
+            "stock": {
+                "name": "ETH",
+                "prec": 8
+            },
+            "money": {
+                "name": "USDT",
+                "prec": 8
+            },
+            "min_amount": "0.0001"
+        },
+        {
+            "name": "EOSUSDT",
+            "stock": {
+                "name": "EOS",
+                "prec": 8
+            },
+            "money": {
+                "name": "USDT",
+                "prec": 8
+            },
+            "min_amount": "0.0001"
+        },
+        {
+            "name": "BCHUSDT",
+            "stock": {
+                "name": "BCH",
+                "prec": 8
+            },
+            "money": {
+                "name": "USDT",
+                "prec": 8
+            },
+            "min_amount": "0.0001"
+        },
+        {
+            "name": "LTCUSDT",
+            "stock": {
+                "name": "LTC",
+                "prec": 8
+            },
+            "money": {
+                "name": "USDT",
+                "prec": 8
+            },
+            "min_amount": "0.0001"
         }
     ],
     "brokers": "127.0.0.1:9092",
