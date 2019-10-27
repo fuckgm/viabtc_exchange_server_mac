@@ -1,7 +1,7 @@
 {
     "process": {
-        "file_limit": 1000000,
-        "core_limit": 1000000000
+        "file_limit": 4,
+        "core_limit": 4
     },
     "log": {
         "path": "/Users/aeneas/Github/Exchange/viabtc_mac/bin/log/trade/alertcenter",
@@ -12,7 +12,7 @@
             "tcp@0.0.0.0:4444",
             "udp@0.0.0.0:4444"
         ],
-        "max_pkg_size": 10240
+        "max_pkg_size": 1024
     },
     "redis": {
         "name": "mymaster",

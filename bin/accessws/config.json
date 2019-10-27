@@ -1,8 +1,8 @@
 {
     "debug": true,
     "process": {
-        "file_limit": 1000000,
-        "core_limit": 1000000000
+        "file_limit": 4,
+        "core_limit": 4
     },
     "log": {
         "path": "/Users/aeneas/Github/Exchange/viabtc_mac/bin/log/trade/accessws",
@@ -17,7 +17,7 @@
         "bind": [
             "stream@/tmp/accessws.sock"
         ],
-        "max_pkg_size": 102400,
+        "max_pkg_size": 1024,
         "protocol": "chat"
     },
     "monitor": {
@@ -31,21 +31,21 @@
         "addr": [
             "tcp@127.0.0.1:7316"
         ],
-        "max_pkg_size": 2000000
+        "max_pkg_size": 1000
     },
     "marketprice": {
         "name": "marketprice",
         "addr": [
             "tcp@127.0.0.1:7416"
         ],
-        "max_pkg_size": 2000000
+        "max_pkg_size": 1000
     },
     "readhistory": {
         "name": "readhistory",
         "addr": [
             "tcp@127.0.0.1:7424"
         ],
-        "max_pkg_size": 2000000
+        "max_pkg_size": 1000
     },
     "deals": {
         "brokers": "127.0.0.1:9092",

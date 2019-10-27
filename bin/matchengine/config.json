@@ -1,8 +1,8 @@
 {
     "debug": true,
     "process": {
-        "file_limit": 100000,
-        "core_limit": 100000000
+        "file_limit": 4,
+        "core_limit": 4
     },
     "log": {
         "path": "./matchengine",
@@ -19,7 +19,7 @@
             "udp@0.0.0.0:7316"
         ],
         "buf_limit": 100,
-        "max_pkg_size": 10240,
+        "max_pkg_size": 1024,
         "heartbeat_check": false
     },
     "cli": "tcp@127.0.0.1:7317",
